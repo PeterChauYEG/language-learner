@@ -1,0 +1,26 @@
+name: Version Bump
+
+run-name: Version Bump (CalVer)
+
+# Requires ./scripts/bump-version.sh <new-version> in this repo (repo-
+# specific — which files carry a version string varies, deliberately not
+# centralized). The reusable workflow owns its own concurrency group
+# (version-bump-${{ github.repository }}) — never add one here; that exact
+# mistake deadlocked laboratory-one-web's main.yml in production on
+# 2026-08-04.
+
+on:
+  schedule:
+    - cron: '0 17 * * 1,3,5'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  checks: write
+  actions: read
+
+jobs:
+  version-bump:
+    uses: PeterChauYEG/labone-actions/.github/workflows/version-bump.yml@main
+    secrets: inherit

@@ -1,0 +1,12 @@
+name: Develop CI
+
+run-name: PR CI
+
+on:
+  pull_request:
+    types: [opened, synchronize, closed]
+
+jobs:
+  ci:
+    uses: PeterChauYEG/labone-actions/.github/workflows/node-pr.yml@main
+    secrets: inherit
