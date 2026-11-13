@@ -5,7 +5,7 @@ updates:
     schedule:
       interval: weekly
     ignore:
-      - dependency-name: "@nestjs/*"
+      - dependency-name: '@nestjs/*'
         update-types:
           - version-update:semver-major
 
