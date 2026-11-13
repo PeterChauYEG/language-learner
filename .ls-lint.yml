@@ -1,0 +1,7 @@
+ls:
+  src:
+    .ts: kebab-case
+
+ignore:
+  - node_modules
+  - dist
