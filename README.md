@@ -31,6 +31,29 @@
 $ yarn install
 ```
 
+## Database (Prisma + Postgres)
+
+Local development uses Postgres via Docker Compose, with [Prisma](https://www.prisma.io/) as the ORM.
+
+```bash
+# copy the example env file and adjust if needed
+$ cp .env.example .env
+
+# start a local Postgres instance
+$ yarn db:up
+
+# apply schema changes / create migrations
+$ yarn prisma:migrate
+
+# regenerate the Prisma client (e.g. after editing prisma/schema.prisma)
+$ yarn prisma:generate
+
+# stop the local Postgres instance
+$ yarn db:down
+```
+
+`DATABASE_URL` in `.env` must point at the Postgres instance started above (see `.env.example`). The Prisma schema lives in `prisma/schema.prisma`; migrations are generated under `prisma/migrations`.
+
 ## Compile and run the project
 
 ```bash
