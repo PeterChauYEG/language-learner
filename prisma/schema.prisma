@@ -27,8 +27,11 @@ enum JlptLevel {
 model Vocab {
   id            Int        @id @default(autoincrement())
   word          String
-  reading       String
-  meaning       String
+  // Nullable: frequency-list-only rows (see seed-data/frequency/) have no
+  // reading/meaning available from the source data; a later enrichment step
+  // fills these in.
+  reading       String?
+  meaning       String?
   jlptLevel     JlptLevel? @map("jlpt_level")
   // Nullable: not every vocab row has a frequency rank (see seed-data/frequency/).
   frequencyRank Int?       @map("frequency_rank")
