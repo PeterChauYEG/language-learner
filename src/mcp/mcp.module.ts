@@ -6,12 +6,15 @@ import { LessonPlanController } from './lesson-plan.controller.js';
 import { LessonPlanService } from './lesson-plan.service.js';
 import { mcpStrategy } from './mcp.strategy.js';
 import { RecordExposureController } from './record-exposure.controller.js';
+import { TutorController } from './tutor.controller.js';
+import { TutorService } from './tutor.service.js';
 
-// Exposes the base Streamable HTTP MCP server plus any `@McpController()`
-// tool controllers registered below.
+// Exposes the base Streamable HTTP MCP server (POST /mcp) plus all
+// `@McpController()` tool controllers registered below: tutor tools
+// (get_user_state, get_due_reviews), record_exposure, and update_lesson_plan.
 @Module({
   imports: [SrsModule],
-  controllers: [RecordExposureController, LessonPlanController],
-  providers: [{ provide: MCP_STRATEGY, useValue: mcpStrategy }, LessonPlanService],
+  controllers: [TutorController, RecordExposureController, LessonPlanController],
+  providers: [{ provide: MCP_STRATEGY, useValue: mcpStrategy }, TutorService, LessonPlanService],
 })
 export class McpModule {}
