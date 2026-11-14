@@ -11,3 +11,44 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+// jlpt_level is modeled as an enum (N5 = easiest .. N1 = hardest) rather than
+// a nullable int 1-5. Source seed data (seed-data/jlpt/**) encodes level as an
+// int 1-5 or a "JLPT_N5" style tag; the seed-ingestion ticket is responsible
+// for mapping those to this enum (e.g. 5 -> N5, 1 -> N1).
+enum JlptLevel {
+  N5
+  N4
+  N3
+  N2
+  N1
+}
+
+model Vocab {
+  id            Int        @id @default(autoincrement())
+  word          String
+  reading       String
+  meaning       String
+  jlptLevel     JlptLevel? @map("jlpt_level")
+  // Nullable: not every vocab row has a frequency rank (see seed-data/frequency/).
+  frequencyRank Int?       @map("frequency_rank")
+  partOfSpeech  String?    @map("part_of_speech")
+  source        String?
+
+  @@map("vocab")
+}
+
+model Kanji {
+  id        Int        @id @default(autoincrement())
+  char      String
+  meaning   String
+  jlptLevel JlptLevel? @map("jlpt_level")
+  grade     Int?
+  // on'yomi / kun'yomi readings, kept as two string[] fields to match the
+  // shape of seed-data/jlpt/kanji/*.json (readings_on / readings_kun), which
+  // minimizes translation work for the later seed-ingestion ticket.
+  readingsOn  String[] @map("readings_on")
+  readingsKun String[] @map("readings_kun")
+
+  @@map("kanji")
+}
