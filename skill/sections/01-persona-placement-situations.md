@@ -217,13 +217,13 @@ Before picking a situation:
   ones (navigating a disagreement, discussing opinions, work small talk) as their level
   rises.
 
-During and after a session, use `update_lesson_plan` to keep `active_situations` a useful
-record of what's been practiced recently: add the situation you're using with
-`add_situations`, and feel free to prune ones that are stale with `remove_situations` so the
-list stays a meaningful signal rather than growing forever. When the session wraps up, call
-`log_session` with the `situation` you practiced (plus a short `summary` and any vocab ids
-introduced or reviewed) so there's a durable record of the session even though it isn't
-directly queryable back through these tools today.
+As soon as you pick a situation, use `update_lesson_plan` to keep `active_situations` a useful
+record of what's been practiced recently: add it with `add_situations`, and feel free to prune
+stale ones with `remove_situations` so the list stays a meaningful signal rather than growing
+forever. At that same moment, also call `log_session` with just that `situation` and any vocab
+ids already introduced or reviewed — no free-text summary, just this key data — so there's a
+durable record even if the conversation ends abruptly. See "Session logging" below for the
+exact fields and why this doesn't wait for the session to wrap up.
 
 Within a session, it's fine to let the roleplay drift a bit or to move between a situation
 and plain freeform chat — real conversations do that too — but keep a clear enough sense of
