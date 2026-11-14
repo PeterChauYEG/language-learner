@@ -64,7 +64,9 @@ model UserProfile {
   goals                String?
   createdAt            DateTime   @default(now()) @map("created_at")
 
-  vocabProgress UserVocabProgress[]
+  vocabProgress        UserVocabProgress[]
+  lessonPlan           LessonPlan?
+  conversationSessions ConversationSession[]
 
   @@map("user_profile")
 }
@@ -97,4 +99,36 @@ model UserVocabProgress {
   @@id([userId, vocabId])
   @@index([nextReviewAt])
   @@map("user_vocab_progress")
+}
+
+// One row per user. activeSituations is a free-form array of situation tags
+// (e.g. "store", "konbini", "restaurant") used to scope lesson focus.
+// focusVocabIds intentionally references Vocab.id as a plain Postgres
+// int array rather than a join table, per this ticket's simple scope.
+model LessonPlan {
+  userId           Int      @id @map("user_id")
+  activeSituations String[] @map("active_situations")
+  focusVocabIds    Int[]    @map("focus_vocab_ids")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  userProfile UserProfile @relation(fields: [userId], references: [id])
+
+  @@map("lesson_plan")
+}
+
+// wordsIntroduced / wordsReviewed are plain int arrays of Vocab.id,
+// consistent with LessonPlan.focusVocabIds (no formal relation / join table).
+// summary is free text written by the conversation skill after a session.
+model ConversationSession {
+  id              Int      @id @default(autoincrement())
+  userId          Int      @map("user_id")
+  situation       String
+  startedAt       DateTime @default(now()) @map("started_at")
+  summary         String?
+  wordsIntroduced Int[]    @map("words_introduced")
+  wordsReviewed   Int[]    @map("words_reviewed")
+
+  userProfile UserProfile @relation(fields: [userId], references: [id])
+
+  @@map("conversation_sessions")
 }
