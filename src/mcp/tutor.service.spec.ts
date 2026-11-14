@@ -3,7 +3,12 @@ import { Test } from '@nestjs/testing';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { PrismaService } from '../prisma/prisma.service.js';
-import { DEFAULT_DUE_REVIEWS_LIMIT, HARDCODED_USER_ID, TutorService } from './tutor.service.js';
+import {
+  DEFAULT_DUE_REVIEWS_LIMIT,
+  DEFAULT_SEARCH_VOCAB_LIMIT,
+  HARDCODED_USER_ID,
+  TutorService,
+} from './tutor.service.js';
 
 describe('TutorService', () => {
   let tutorService: TutorService;
@@ -11,6 +16,7 @@ describe('TutorService', () => {
     userProfile: { findUnique: ReturnType<typeof vi.fn>; create: ReturnType<typeof vi.fn> };
     lessonPlan: { findUnique: ReturnType<typeof vi.fn> };
     userVocabProgress: { count: ReturnType<typeof vi.fn>; findMany: ReturnType<typeof vi.fn> };
+    vocab: { findMany: ReturnType<typeof vi.fn> };
   };
 
   beforeEach(async () => {
@@ -18,6 +24,7 @@ describe('TutorService', () => {
       userProfile: { findUnique: vi.fn(), create: vi.fn() },
       lessonPlan: { findUnique: vi.fn() },
       userVocabProgress: { count: vi.fn(), findMany: vi.fn() },
+      vocab: { findMany: vi.fn() },
     };
 
     const app: TestingModule = await Test.createTestingModule({
@@ -104,6 +111,36 @@ describe('TutorService', () => {
       expect(prisma.userVocabProgress.findMany).toHaveBeenCalledWith(
         expect.objectContaining({ take: 5 }),
       );
+    });
+  });
+
+  describe('searchVocab', () => {
+    it('queries vocab with no progress for the hardcoded user, defaulting the limit', async () => {
+      prisma.userProfile.findUnique.mockResolvedValue({ id: HARDCODED_USER_ID });
+      const rows = [{ id: 1, word: '猫' }];
+      prisma.vocab.findMany.mockResolvedValue(rows);
+
+      const result = await tutorService.searchVocab();
+
+      expect(result).toBe(rows);
+      expect(prisma.vocab.findMany).toHaveBeenCalledWith({
+        where: { progress: { none: { userId: HARDCODED_USER_ID } } },
+        orderBy: [{ frequencyRank: 'asc' }, { id: 'asc' }],
+        take: DEFAULT_SEARCH_VOCAB_LIMIT,
+      });
+    });
+
+    it('filters by level and passes a custom limit through to the query', async () => {
+      prisma.userProfile.findUnique.mockResolvedValue({ id: HARDCODED_USER_ID });
+      prisma.vocab.findMany.mockResolvedValue([]);
+
+      await tutorService.searchVocab('N3', 5);
+
+      expect(prisma.vocab.findMany).toHaveBeenCalledWith({
+        where: { jlptLevel: 'N3', progress: { none: { userId: HARDCODED_USER_ID } } },
+        orderBy: [{ frequencyRank: 'asc' }, { id: 'asc' }],
+        take: 5,
+      });
     });
   });
 });
