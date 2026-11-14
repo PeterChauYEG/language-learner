@@ -40,6 +40,33 @@ ssh root@10.10.30.31 "dokku ports:set language-learner http:<DOKKU_PROXY_PORT>:3
 (`<DOKKU_PROXY_PORT>` is whatever `dokku config:show language-learner` reports
 for `DOKKU_PROXY_PORT`.)
 
+## Production build/runtime fixes required
+
+Deploying revealed three bugs that blocked every build/boot, fixed in this
+same change (confirmed end-to-end by pushing directly to the Dokku git
+remote until the app reported `Deployed: true` / `Running: true`):
+
+1. **`postinstall` never ran `prisma generate`.** `generated/prisma` (the
+   Prisma client, imported throughout `src/`) was only ever produced by
+   manually running `yarn prisma:generate` locally — a fresh buildpack
+   install had nothing to generate it. Added `"postinstall": "prisma
+   generate"` to `package.json`.
+2. **`tsconfig.build.json`'s `rootDir: ./src` excluded the generated
+   client**, which lives at the project root (`generated/`), so `nest build`
+   failed with `TS6059`/`TS2339`/`TS2307` on every Prisma import. Widened
+   `rootDir` to `.` and `include` to `["src", "generated"]`, which moves
+   build output to `dist/src/**` + `dist/generated/**` — updated
+   `start:prod` to `node dist/src/main` accordingly.
+3. **`prisma` (the CLI) was devDependency-only.** The buildpack's
+   `yarn heroku prune` step (removes devDependencies) triggers a rebuild of
+   the workspace package, which reruns `postinstall` — with `prisma` already
+   pruned, that second `prisma generate` failed with exit 127. Moved `prisma`
+   to `dependencies`.
+4. **No `Procfile`.** Without one, the buildpack defaulted the `web` process
+   to `yarn start` (`nest start`, a dev-mode command needing `@nestjs/cli`,
+   a pruned devDependency) — every container crash-looped with `sh: 1: nest:
+   not found`. Added a `Procfile` with `web: yarn start:prod`.
+
 ## Deploy mechanism
 
 `.github/workflows/main.yml` runs on every push to `main` (and via manual
