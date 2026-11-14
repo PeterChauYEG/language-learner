@@ -2,11 +2,13 @@ import { Module } from '@nestjs/common';
 import { MCP_STRATEGY } from '@rekog/mcp-nest';
 
 import { mcpStrategy } from './mcp.strategy.js';
+import { TutorController } from './tutor.controller.js';
+import { TutorService } from './tutor.service.js';
 
-// No tools/resources/prompts are registered yet - this just exposes the base
-// Streamable HTTP MCP server so a client can complete the initialize
-// handshake against POST /mcp.
+// Exposes the Streamable HTTP MCP server (POST /mcp) along with the tutor
+// tools (get_user_state, get_due_reviews) registered on TutorController.
 @Module({
-  providers: [{ provide: MCP_STRATEGY, useValue: mcpStrategy }],
+  controllers: [TutorController],
+  providers: [{ provide: MCP_STRATEGY, useValue: mcpStrategy }, TutorService],
 })
 export class McpModule {}
