@@ -10,6 +10,17 @@ const getDueReviewsSchema = z.object({
 
 type GetDueReviewsInput = z.infer<typeof getDueReviewsSchema>;
 
+const JLPT_LEVELS = ['N5', 'N4', 'N3', 'N2', 'N1'] as const;
+
+const searchVocabSchema = z.object({
+  level: z.enum(JLPT_LEVELS).optional(),
+  // Accepted but currently a no-op - see TutorService.searchVocab.
+  situation_tag: z.string().optional(),
+  limit: z.number().int().positive().optional(),
+});
+
+type SearchVocabInput = z.infer<typeof searchVocabSchema>;
+
 /**
  * MCP tools backing the language-learning tutor: current state of the
  * (single, hardcoded) user and their due spaced-repetition reviews.
@@ -41,6 +52,22 @@ export class TutorController {
     const dueReviews = await this.tutorService.getDueReviews(limit);
     return {
       content: [{ type: 'text' as const, text: JSON.stringify(dueReviews) }],
+    };
+  }
+
+  @Tool({
+    name: 'search_vocab',
+    description:
+      'Returns candidate new vocab for introduction to the user: Vocab rows not yet in the ' +
+      "user's progress, optionally filtered by JLPT `level` (N5-N1), up to `limit` items " +
+      '(default 20). `situation_tag` is accepted but currently ignored - there is no ' +
+      'situation-tagging on vocab yet.',
+    parameters: searchVocabSchema,
+  })
+  async searchVocab(@Payload() { level, limit }: SearchVocabInput) {
+    const candidates = await this.tutorService.searchVocab(level, limit);
+    return {
+      content: [{ type: 'text' as const, text: JSON.stringify(candidates) }],
     };
   }
 }

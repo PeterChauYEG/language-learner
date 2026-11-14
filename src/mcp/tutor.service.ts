@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 
 import type {
+  JlptLevel,
   LessonPlan,
   UserProfile,
   UserVocabProgress,
@@ -15,6 +16,8 @@ import { PrismaService } from '../prisma/prisma.service.js';
 export const HARDCODED_USER_ID = 1;
 
 export const DEFAULT_DUE_REVIEWS_LIMIT = 20;
+
+export const DEFAULT_SEARCH_VOCAB_LIMIT = 20;
 
 export interface UserState {
   userProfile: UserProfile;
@@ -76,6 +79,34 @@ export class TutorService {
       orderBy: { nextReviewAt: 'asc' },
       take: limit,
       include: { vocab: true },
+    });
+  }
+
+  /**
+   * Candidate new vocab for introduction to the hardcoded user: `Vocab`
+   * rows that don't have a `UserVocabProgress` row yet (i.e. never
+   * introduced/reviewed), optionally filtered by JLPT level, ordered by
+   * frequency rank (most common first, unranked rows last) then id, up to
+   * `limit` items.
+   *
+   * `situationTag` is intentionally unused for now - there's no
+   * situation-tagging on `Vocab` rows yet, so it's accepted by the tool for
+   * forward compatibility but is a no-op filter until a later enrichment
+   * ticket adds situation tags to vocab.
+   */
+  async searchVocab(
+    level?: JlptLevel,
+    limit: number = DEFAULT_SEARCH_VOCAB_LIMIT,
+  ): Promise<Vocab[]> {
+    await this.findOrCreateUser();
+
+    return this.prisma.vocab.findMany({
+      where: {
+        ...(level ? { jlptLevel: level } : {}),
+        progress: { none: { userId: HARDCODED_USER_ID } },
+      },
+      orderBy: [{ frequencyRank: 'asc' }, { id: 'asc' }],
+      take: limit,
     });
   }
 }
