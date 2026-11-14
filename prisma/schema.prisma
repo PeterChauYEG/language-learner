@@ -35,20 +35,66 @@ model Vocab {
   partOfSpeech  String?    @map("part_of_speech")
   source        String?
 
+  progress UserVocabProgress[]
+
   @@map("vocab")
 }
 
 model Kanji {
-  id        Int        @id @default(autoincrement())
-  char      String
-  meaning   String
-  jlptLevel JlptLevel? @map("jlpt_level")
-  grade     Int?
+  id          Int        @id @default(autoincrement())
+  char        String
+  meaning     String
+  jlptLevel   JlptLevel? @map("jlpt_level")
+  grade       Int?
   // on'yomi / kun'yomi readings, kept as two string[] fields to match the
   // shape of seed-data/jlpt/kanji/*.json (readings_on / readings_kun), which
   // minimizes translation work for the later seed-ingestion ticket.
-  readingsOn  String[] @map("readings_on")
-  readingsKun String[] @map("readings_kun")
+  readingsOn  String[]   @map("readings_on")
+  readingsKun String[]   @map("readings_kun")
 
   @@map("kanji")
+}
+
+// No auth system yet: UserProfile is a plain row with no credentials. A
+// single hardcoded user is expected for now; a future auth ticket can add
+// credentials/identity fields without touching this shape.
+model UserProfile {
+  id                   Int        @id @default(autoincrement())
+  currentLevelEstimate JlptLevel? @map("current_level_estimate")
+  goals                String?
+  createdAt            DateTime   @default(now()) @map("created_at")
+
+  vocabProgress UserVocabProgress[]
+
+  @@map("user_profile")
+}
+
+enum VocabProgressStatus {
+  NEW
+  LEARNING
+  KNOWN
+}
+
+// interval / easeFactor / nextReviewAt / lastResult are kept field-for-field
+// consistent with src/srs/sm2.ts's Sm2Result (interval: Int, easeFactor:
+// Float, nextReviewAt: DateTime) so the SM-2-persistence ticket can persist
+// results directly without conversions.
+model UserVocabProgress {
+  userId       Int                 @map("user_id")
+  vocabId      Int                 @map("vocab_id")
+  status       VocabProgressStatus @default(NEW)
+  interval     Int                 @default(0)
+  easeFactor   Float               @default(2.5) @map("ease_factor")
+  nextReviewAt DateTime            @default(now()) @map("next_review_at")
+  // Quality score (0-5) from the most recent review. Null when the item is
+  // still NEW and has never been reviewed.
+  lastResult   Int?                @map("last_result")
+  lastSeenAt   DateTime?           @map("last_seen_at")
+
+  userProfile UserProfile @relation(fields: [userId], references: [id])
+  vocab       Vocab       @relation(fields: [vocabId], references: [id])
+
+  @@id([userId, vocabId])
+  @@index([nextReviewAt])
+  @@map("user_vocab_progress")
 }
