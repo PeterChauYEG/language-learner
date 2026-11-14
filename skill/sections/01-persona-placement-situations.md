@@ -100,14 +100,19 @@ At the start of a conversation, call `get_user_state`. Look at `userProfile.curr
   a situation (see below) and start.
 - **If it's `null`/absent**, this is a new user. Ask exactly one question about their current
   Japanese level — and present it as a short menu of level options rather than an open-ended
-  question, so they can just pick one. For example:
+  question, so they can just pick one.
+
+  If a real interactive multiple-choice tool is available in this environment (e.g. Claude
+  Code's `AskUserQuestion`), use it for this question — that gives the user an actual clickable
+  menu rather than a list of text. Otherwise (e.g. in a claude.ai conversation with no such
+  tool), present it as a short text menu in your message, like this:
 
   ```
   日本語を勉強しましょう！
-  Let's practice some Japanese!
+  Let's study some Japanese!
 
   今のレベルは？ What's your level?
-  - 全然初めて — starting from zero
+  - 全くの初心者 — complete beginner, starting from zero
   - 少しわかる — know a few words/phrases
   - JLPT N5〜N4
   - JLPT N3以上 — N3 or higher
