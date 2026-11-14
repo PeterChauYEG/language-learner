@@ -16,3 +16,8 @@ jobs:
     secrets: inherit
     with:
       dokku_remote_url: 'ssh://dokku@10.10.30.31:22/language-learner'
+      # postinstall runs `prisma generate` - fold the schema into the
+      # node_modules cache key so a schema-only change (no yarn.lock bump)
+      # still regenerates the Prisma client instead of restoring a stale
+      # cached one. See main-node-ci.yml's own input doc for this input.
+      extra_deps_cache_key_glob_1: 'prisma/schema.prisma'
