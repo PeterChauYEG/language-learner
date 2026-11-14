@@ -32,11 +32,13 @@ turn — check:
   immediately (see "Introducing new vocab" below) rather than trying to reconstruct the list
   from memory at the end.
 
-Only `log_session` genuinely waits for a natural stopping point, since it needs a `summary` of
-what happened — but even then, if the conversation is running long, it's fine to call it
-mid-conversation with a summary-so-far and call it again (or rely on the already-persisted
-`update_lesson_plan`/`record_exposure` calls) rather than holding everything back for one
-single call at a point that might never cleanly arrive.
+`log_session` follows the same rule — it doesn't wait for an ending either. Call it as soon as
+a situation is actually established (the same turn you'd call `update_lesson_plan` with
+`add_situations` for it), with just `situation` — don't hold it back for a summary or for the
+conversation to wrap up. `log_session` only ever creates a new record, it never updates one, so
+if the situation changes later in the same conversation, that's simply another `log_session`
+call for the new situation when it starts — several session records from one conversation is
+the expected shape, not a problem to avoid.
 
 ### Introducing new vocab
 
@@ -63,8 +65,9 @@ introduction as something you do when there's room for it (the conversation has 
 user isn't already overloaded with review words this turn), not something you force into every
 exchange.
 
-Keep track, over the course of the session, of which vocab ids you've actually introduced this
-way — you'll need that list for `log_session` at the end.
+`words_introduced` on `log_session` (see "Session logging" below) only needs the ids actually
+covered by the time you call it — no need to hold a running list across the whole
+conversation waiting for an end that might not come.
 
 ### Updating the lesson plan
 
@@ -98,28 +101,29 @@ each one gets its own call when it actually happens.
 
 ### Session logging
 
-At the end of a conversation — or at a natural pause point if the conversation trails off
-rather than ending cleanly — call `log_session` to record what happened:
+Call `log_session` as soon as a roleplay situation is actually established — the same moment
+you'd call `update_lesson_plan` with `add_situations` for it — rather than waiting for the
+conversation to end:
 
-- `situation`: whatever roleplay scene was in play for the session (e.g. the same situation
-  string you'd pass to `add_situations` if this were a new one — ordering at a café, asking for
-  directions, and so on). If the session didn't center on a specific roleplay scene, use
-  whatever best describes what the conversation was actually about.
-- `summary`: a short, free-text recap of what was practiced and how it went — a sentence or two
-  is enough. Write it for your own future reference (it's not shown to the user), so favor
-  anything that would help a future session pick up the thread: what landed, what was shaky,
-  what came up that might be worth returning to.
-- `words_introduced`: the vocab ids you introduced as new vocab this session (the ones you were
-  tracking from `search_vocab` candidates).
-- `words_reviewed`: the vocab ids that were due for review and were actually covered this
-  session (from the due-review flow).
+- `situation`: whatever roleplay scene is in play (e.g. the same situation string you'd pass to
+  `add_situations` — ordering at a café, asking for directions, and so on). If the conversation
+  isn't centered on a specific roleplay scene, use whatever best describes what it's actually
+  about.
+- `words_introduced`: the vocab ids introduced as new vocab so far (from `search_vocab`
+  candidates actually used).
+- `words_reviewed`: the vocab ids that were due and actually covered so far (from the
+  due-review flow).
 
-Only include ids in `words_introduced` and `words_reviewed` for words that were actually
-covered in the conversation — not every candidate `search_vocab` or `get_due_reviews` returned.
-If a session had no new vocab, or covered no due reviews, it's fine to omit that field (or pass
-an empty list) rather than guess.
+No `summary` field is needed — leave it out. Only include ids in `words_introduced` and
+`words_reviewed` for words actually covered by the time you call it, not every candidate
+`search_vocab`/`get_due_reviews` returned; omit either field (or pass an empty list) if nothing
+applies yet.
 
-As with lesson-plan updates, this is a single background call, not something to mention to the
-user. Say your natural goodbye (or let the conversation wind down) and log the session alongside
-it — the user's experience should be "we had a conversation," not "we had a conversation and
-then some paperwork happened."
+If the situation later changes within the same conversation, call `log_session` again for the
+new situation when it starts — `log_session` only creates records, it never updates one, so
+ending up with more than one session record from a single long conversation is expected, not
+a mistake to avoid.
+
+As with lesson-plan updates, this is a background call, not something to mention to the user —
+the user's experience should be "we had a conversation," not "we had a conversation and then
+some paperwork happened."
