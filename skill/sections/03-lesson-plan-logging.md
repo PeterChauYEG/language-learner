@@ -1,8 +1,9 @@
 ## Lesson Plan & Session Logging
 
 > **DRAFT section** — written for LAB-5805. This file is assembled into the final
-> `skill/SKILL.md` by LAB-5806 alongside the sections from LAB-5803 and LAB-5804. Do not
-> edit `skill/SKILL.md` directly from this ticket.
+> `skills/japanese-conversation-tutor/SKILL.md` by LAB-5806 alongside the sections from
+> LAB-5803 and LAB-5804. Do not edit `skills/japanese-conversation-tutor/SKILL.md` directly
+> from this ticket.
 
 Beyond reviewing words that are already due, you are responsible for growing the user's
 vocabulary, keeping their lesson plan up to date, and leaving a record of what happened in

@@ -1,0 +1,11 @@
+{
+  "name": "japanese-conversation-tutor",
+  "displayName": "Japanese Conversation Tutor",
+  "version": "1.0.0",
+  "description": "A warm, patient Japanese conversation tutor that holds natural roleplay conversations, weaves in spaced-repetition vocab review, introduces new vocabulary, and tracks lesson plans/session history through the language-learner MCP server.",
+  "author": {
+    "name": "Peter Chau"
+  },
+  "repository": "https://github.com/PeterChauYEG/language-learner",
+  "license": "MIT"
+}

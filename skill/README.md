@@ -5,33 +5,46 @@ that turns Claude into a Japanese conversation tutor, backed by this repo's MCP 
 (`src/mcp/*.controller.ts`, deployed per `DEPLOY.md` at
 `https://language-learner.labone.tech/mcp`).
 
-- `SKILL.md` — the assembled skill (YAML frontmatter + instructional body). This is the file
-  claude.ai actually needs; it's assembled from `sections/01-*.md` through `sections/03-*.md`
-  plus a short intro. Edit the section files for content changes and re-run the build below —
-  don't hand-edit the assembled sections in `SKILL.md` (the intro paragraph and frontmatter are
-  fine to edit directly).
+## Installing as a plugin (preferred)
+
+This repo is a Claude Code/claude.ai Plugin (see `.claude-plugin/plugin.json` at the repo
+root). Install it directly from the repo instead of building/uploading a zip:
+
+- **claude.ai / desktop app**: Customize -> Plugins -> Add -> Add marketplace, then paste
+  `PeterChauYEG/language-learner`.
+- **Claude Code**: `/plugin` -> Add from repository, same repo.
+
+Turn on "Sync automatically" so future merges to `main` propagate automatically, with no
+manual zip re-upload needed.
+
+- `skills/japanese-conversation-tutor/SKILL.md` — the assembled skill (YAML frontmatter +
+  instructional body). This is the file claude.ai/Claude Code actually load; it's assembled
+  from `sections/01-*.md` through `sections/03-*.md` plus a short intro. Edit the section
+  files for content changes and re-run the build below — don't hand-edit the assembled
+  sections in `SKILL.md` (the intro paragraph and frontmatter are fine to edit directly).
 - `sections/` — the original drafted sections (LAB-5803, LAB-5804, LAB-5805), kept as the
   source of truth for their content.
 - `dist/` — build output (gitignored; see "Building the zip" below). Not committed.
 
-## Building the zip
+## Building the zip (manual fallback)
 
-claude.ai's Skill upload accepts a `.zip` whose root contains `SKILL.md` (plus any bundled
-scripts/resources — this skill has none, so just the one file). This repo's root `.gitignore`
-excludes `dist/` globally, so the zip isn't committed to git — only the inputs (`SKILL.md`) are
-versioned, and the archive is reproducible from them on demand:
+claude.ai's "Upload plugin" zip path accepts a `.zip` whose root contains `SKILL.md` (plus any
+bundled scripts/resources — this skill has none, so just the one file). This repo's root
+`.gitignore` excludes `dist/` globally, so the zip isn't committed to git — only the inputs
+(`skills/japanese-conversation-tutor/SKILL.md`) are versioned, and the archive is reproducible
+from them on demand:
 
 ```sh
 mkdir -p skill/dist
-cd skill && python3 -c "
+python3 -c "
 import zipfile
-with zipfile.ZipFile('dist/language-learner-tutor.zip', 'w', zipfile.ZIP_DEFLATED) as z:
-    z.write('SKILL.md', 'SKILL.md')
+with zipfile.ZipFile('skill/dist/language-learner-tutor.zip', 'w', zipfile.ZIP_DEFLATED) as z:
+    z.write('skills/japanese-conversation-tutor/SKILL.md', 'SKILL.md')
 "
 ```
 
-(Any zip tool works — `zip -j skill/dist/language-learner-tutor.zip skill/SKILL.md` is
-equivalent if `zip` is installed.)
+(Any zip tool works — `zip -j skill/dist/language-learner-tutor.zip skills/japanese-conversation-tutor/SKILL.md`
+is equivalent if `zip` is installed.)
 
 ## Manual end-to-end test (cannot be done from a container)
 
