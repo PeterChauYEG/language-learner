@@ -1,0 +1,14 @@
+{
+  "name": "language-learner-marketplace",
+  "owner": {
+    "name": "Peter Chau"
+  },
+  "description": "Marketplace for the language-learner project's Japanese Conversation Tutor plugin.",
+  "plugins": [
+    {
+      "name": "japanese-conversation-tutor",
+      "source": "./",
+      "description": "A warm, patient Japanese conversation tutor that holds natural roleplay conversations, weaves in spaced-repetition vocab review, introduces new vocabulary, and tracks lesson plans/session history through the language-learner MCP server."
+    }
+  ]
+}
