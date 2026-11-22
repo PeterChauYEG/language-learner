@@ -17,6 +17,18 @@ root). Install it directly from the repo instead of building/uploading a zip:
 Turn on "Sync automatically" so future merges to `main` propagate automatically, with no
 manual zip re-upload needed.
 
+## Using it
+
+Just run `/japanese-conversation-tutor` with nothing after it — a new user gets asked one
+quick level question, then is dropped straight into a roleplay scene the tutor picks itself.
+An existing user skips the level question and goes straight into a scene. You don't need to
+know what to practice or say anything else; picking and varying situations is the skill's job,
+not something the user is expected to choose up front.
+
+You can optionally add a specific ask (e.g. `/japanese-conversation-tutor help me practice
+ordering food at a restaurant`) and the skill will honor it instead of picking its own
+situation — but that's an option, not something you need to supply to get started.
+
 - `skills/japanese-conversation-tutor/SKILL.md` — the assembled skill (YAML frontmatter +
   instructional body). This is the file claude.ai/Claude Code actually load; it's assembled
   from `sections/01-*.md` through `sections/03-*.md` plus a short intro. Edit the section
