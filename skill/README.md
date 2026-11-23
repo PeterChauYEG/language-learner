@@ -68,10 +68,15 @@ path to Skills/Connectors setup, so this can't be scripted or run from CI/a cont
    `language-learner-tutor.zip`. Claude.ai parses the `name`/`description` frontmatter for
    skill discovery, so double check the skill shows up with the expected name after upload.
 3. **Add the MCP connector**: claude.ai -> Settings -> Connectors -> Add custom connector,
-   pointing at `https://language-learner.labone.tech/mcp` (Streamable HTTP transport, no auth
-   — the server has no auth layer yet, see `src/mcp/mcp.strategy.ts`). Enable all 6 tools:
-   `get_user_state`, `get_due_reviews`, `search_vocab`, `record_exposure`,
-   `update_lesson_plan`, `log_session`.
+   pointing at `https://language-learner.labone.tech/mcp` (Streamable HTTP transport). The
+   endpoint requires a shared-secret key (see `src/mcp/mcp-auth.middleware.ts`) — either:
+   - append `?key=<MCP_API_KEY value>` to the connector URL, or
+   - if the client supports custom headers, set `Authorization: Bearer <MCP_API_KEY value>`
+     instead.
+
+   The key value lives in this org's `ops/.env` as `LANGUAGE_LEARNER_MCP_API_KEY` — don't hardcode
+   it anywhere else. Enable all 6 tools: `get_user_state`, `get_due_reviews`, `search_vocab`,
+   `record_exposure`, `update_lesson_plan`, `log_session`.
 4. **Enable the skill + connector together in a chat** and have an actual conversation:
    - Say hello in Japanese or English and confirm Claude opens with a roleplay situation
      rather than announcing a test.

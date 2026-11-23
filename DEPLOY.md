@@ -8,7 +8,7 @@ Postgres addon (`dokku-postgres-language-learner-db`). The addon link sets
 
 ## Required environment variables
 
-The app only reads two env vars (see `src/main.ts`,
+The app reads these env vars (see `src/main.ts`, `src/mcp/mcp-auth.middleware.ts`,
 `src/prisma/prisma.service.ts`):
 
 | Var            | Value                                  | How it's set |
@@ -16,6 +16,7 @@ The app only reads two env vars (see `src/main.ts`,
 | `DATABASE_URL` | Postgres connection string              | Set automatically by the linked Postgres addon |
 | `PORT`         | `3000`                                  | Set manually (see below) |
 | `NODE_ENV`     | `production`                            | Set manually (standard Node/Nest convention) |
+| `MCP_API_KEY`  | Shared-secret key for the public `/mcp` endpoint | Set manually — no default, must be set in production. If left unset, `/mcp` runs with no auth (a boot-time console warning is logged) |
 
 Set/verify with:
 
